@@ -4,6 +4,7 @@ import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as node from 'aws-cdk-lib/aws-lambda-nodejs';
+import * as logs from 'aws-cdk-lib/aws-logs';
 import * as cr from 'aws-cdk-lib/custom-resources';
 import { marshall } from '@aws-sdk/util-dynamodb';
 import { Construct } from 'constructs';
@@ -50,6 +51,7 @@ export class AppApiStack extends cdk.Stack {
 
     table.grantReadData(getMovieRolesFn);
     table.grantReadData(getActorFn);
+    
 
     // Sample data, written once when the stack is created.
     const items = seedItems();
@@ -75,10 +77,28 @@ export class AppApiStack extends cdk.Stack {
       resultsCacheTtl: cdk.Duration.minutes(0),
     });
 
+    const accessLogs = new logs.LogGroup(this, 'AppApiAccessLogs', {
+      retention: logs.RetentionDays.ONE_MONTH,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+
     const api = new apig.RestApi(this, 'AppApi', {
       description: 'Movie cast API',
       endpointTypes: [apig.EndpointType.REGIONAL],
-      deployOptions: { stageName: 'dev' },
+      deployOptions: {
+        stageName: 'dev',
+        accessLogDestination: new apig.LogGroupLogDestination(accessLogs),
+        accessLogFormat: apig.AccessLogFormat.custom(
+          JSON.stringify({
+            requestId: '$context.requestId',
+            requestTime: '$context.requestTime',
+            httpMethod: '$context.httpMethod',
+            path: '$context.path',
+            status: '$context.status',
+            username: '$context.authorizer.username',
+          }),
+        ),
+      },
       defaultCorsPreflightOptions: {
         allowHeaders: ['Content-Type', 'X-Amz-Date', 'Authorization', 'X-Api-Key'],
         allowMethods: ['OPTIONS', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
@@ -91,11 +111,12 @@ export class AppApiStack extends cdk.Stack {
       authorizer: userAuthorizer,
       authorizationType: apig.AuthorizationType.CUSTOM,
     };
+
     // Routes
     const moviesResource = api.root.addResource('movies');
 
     const movieRolesResource = moviesResource.addResource('{movieID}').addResource('roles');
-    movieRolesResource.addMethod('GET', new apig.LambdaIntegration(getMovieRolesFn) );
+    movieRolesResource.addMethod('GET', new apig.LambdaIntegration(getMovieRolesFn), userAuth);
 
     api.root
       .addResource('actors')
