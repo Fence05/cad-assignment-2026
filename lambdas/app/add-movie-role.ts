@@ -2,6 +2,7 @@ import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { TransactWriteCommand } from "@aws-sdk/lib-dynamodb";
 import { actorKey, ddb, movieKey, type Role, tableName } from "../shared/db";
 import { isResponse, parseJsonObject, response } from "../shared/http";
+import type { TransactionCanceledException } from "@aws-sdk/client-dynamodb";
 
 const isPositiveInteger = (value: unknown): value is number =>
   Number.isInteger(value) && (value as number) > 0;
