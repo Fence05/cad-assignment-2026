@@ -3,9 +3,11 @@ import { actorKey, ddb, movieKey, type Role, tableName } from "../shared/db";
 import { isResponse, parseJsonObject, response } from "../shared/http";
 import { GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
 
+//checks if value is a int, true of false and if its above 0
 const isPositiveInteger = (value: unknown): value is number =>
   Number.isInteger(value) && (value as number) > 0;
 
+//checks if value is string and not null
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.trim() !== "";
 
