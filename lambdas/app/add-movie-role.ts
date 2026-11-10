@@ -19,10 +19,39 @@ export const handler = async (
     roleDescription: body.roleDescription as string,
   };
 
-  try {
-    //  TOD∏O - Add role if its IDs are valid
+try {
+    // Validate movieId and actorId
+    const isMovieIdValid = await isValidId(movieKey, role.movieId);
+    const isActorIdValid = await isValidId(actorKey, role.actorId);
+
+    if (!isMovieIdValid || !isActorIdValid) {
+      return response(400, { message: "Invalid movieId or actorId" });
+    }
+
+    // Add role to DynamoDB
+    const params = {
+      TransactItems: [
+        {
+          Put: {
+            TableName: tableName,
+            Item: {
+              PK: `MOVIE#${role.movieId}`,
+              SK: `ROLE#${role.actorId}`,
+              RoleName: role.roleName,
+              RoleDescription: role.roleDescription,
+            },
+          },
+        },
+      ],
+    };
+
+    await ddb.send(new TransactWriteCommand(params));
+
+    // Return success response
     return response(201, { message: "Role added", data: role });
-  } catch (err) {
+  }
+  
+  catch (err) {
     console.error("DynamoDB error:", err);
     return response(500, {
       message: "Internal server error",
