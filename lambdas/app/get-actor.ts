@@ -55,7 +55,10 @@ export const handler = async (
       })
     );
 
+    //convert info from db to role , then print roleDesc if found
     const roleDescription = roleResult.Item ? toRole(roleResult.Item).roleDescription : undefined;
+
+
 
     return response(200, { data: { data: actor, roleDescription } });
 
