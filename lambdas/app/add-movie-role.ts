@@ -59,6 +59,22 @@ const roleDescription = body.roleDescription;
       return response(404, { message: `Actor ${actorId} not found` });
     }
 
+
+    //checks if the role already exists
+    const roleResult = await ddb.send(
+      new GetCommand({
+        TableName: tableName,
+        Key: { PK: movieKey(movieId), SK: actorKey(actorId) },
+      })
+    );
+    if (roleResult.Item) {
+      return response(409, {
+        message: `Actor ${actorId} already has a role in movie ${movieId}`,
+      });
+    }
+
+
+    
     //puts the role into the database
     await ddb.send(
       new PutCommand({
