@@ -2,7 +2,7 @@ import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { TransactWriteCommand } from "@aws-sdk/lib-dynamodb";
 import { actorKey, ddb, movieKey, type Role, tableName } from "../shared/db";
 import { isResponse, parseJsonObject, response } from "../shared/http";
-import type { TransactionCanceledException } from "@aws-sdk/client-dynamodb";
+import { GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
 
 const isPositiveInteger = (value: unknown): value is number =>
   Number.isInteger(value) && (value as number) > 0;
@@ -37,9 +37,44 @@ const roleDescription = body.roleDescription;
   const role: Role = { movieId, actorId, roleName, roleDescription };
 
   try {
-    //  TOD∏O - Add role if its IDs are valid
+    //checks if movie exists to write role into
+        const movieResult = await ddb.send(
+      new GetCommand({
+        TableName: tableName,
+        Key: { PK: movieKey(movieId), SK: movieKey(movieId) },
+      })
+    );
+    if (!movieResult.Item) {
+      return response(404, { message: `Movie ${movieId} not found` });
+    }
+
+    //checks if actor exists to write role into
+    const actorResult = await ddb.send(
+      new GetCommand({
+        TableName: tableName,
+        Key: { PK: actorKey(actorId), SK: actorKey(actorId) },
+      })
+    );
+    if (!actorResult.Item) {
+      return response(404, { message: `Actor ${actorId} not found` });
+    }
+
+    //puts the role into the database
+    await ddb.send(
+      new PutCommand({
+        TableName: tableName,
+        Item: { PK: movieKey(movieId), SK: actorKey(actorId), ...role },
+      })
+    );
+
+
+
+
+
     return response(201, { message: "Role added", data: role });
-  } catch (err) {
+  } 
+  
+  catch (err) {
     console.error("DynamoDB error:", err);
     return response(500, {
       message: "Internal server error",
