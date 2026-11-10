@@ -51,6 +51,7 @@ export class AppApiStack extends cdk.Stack {
     table.grantReadData(getMovieRolesFn);
     table.grantReadData(getActorFn);
     table.grantWriteData(addMovieRoleFn);
+    table.grantReadData(addMovieRoleFn);
 
     // Sample data, written once when the stack is created.
     const items = seedItems();
@@ -122,3 +123,5 @@ new cdk.CfnOutput(this, 'AdminApiKeyId', { value: adminKey.keyId });
 
   }
 }
+
+// aws apigateway get-api-key --api-key <AdminApiKeyId> --include-value
