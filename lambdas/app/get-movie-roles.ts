@@ -7,7 +7,7 @@ import {
   parseId,
   tableName,
   toRole,
-  isMovieItem,
+  isMovieItem, //imported a checker
 } from "../shared/db";
 import { response } from "../shared/http";
 import { logRequest } from "../shared/request-logger";

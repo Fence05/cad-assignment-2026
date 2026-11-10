@@ -100,6 +100,6 @@ export class AppApiStack extends cdk.Stack {
     api.root
       .addResource('actors')
       .addResource('{actorID}')
-      .addMethod('GET', new apig.LambdaIntegration(getActorFn), userAuth);
+      .addMethod('GET', new apig.LambdaIntegration(getActorFn), userAuth); //added user auth
   }
 }
