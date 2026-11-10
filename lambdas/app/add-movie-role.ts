@@ -15,12 +15,25 @@ export const handler = async (
   const body = parseJsonObject(event);
   if (isResponse(body)) return body;
 
-  const role: Role = {
-    movieId: body.movieId as number,
-    actorId: body.actorId as number,
-    roleName: body.roleName as string,
-    roleDescription: body.roleDescription as string,
-  };
+
+
+
+const movieId = body.movieId;
+const actorId = body.actorId;
+const roleName = body.roleName;
+const roleDescription = body.roleDescription;
+
+  if (!isPositiveInteger(movieId) || !isPositiveInteger(actorId)) {
+    return response(400, {
+      message: "movieId and actorId must be positive integers",
+    });
+  }
+  if (!isNonEmptyString(roleName) || !isNonEmptyString(roleDescription)) {
+    return response(400, {
+      message: "roleName and roleDescription must be non empty strings",
+    });
+  }
+  const role: Role = { movieId, actorId, roleName, roleDescription };
 
   try {
     //  TOD∏O - Add role if its IDs are valid
