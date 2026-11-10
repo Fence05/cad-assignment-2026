@@ -3,6 +3,12 @@ import { TransactWriteCommand } from "@aws-sdk/lib-dynamodb";
 import { actorKey, ddb, movieKey, type Role, tableName } from "../shared/db";
 import { isResponse, parseJsonObject, response } from "../shared/http";
 
+const isPositiveInteger = (value: unknown): value is number =>
+  Number.isInteger(value) && (value as number) > 0;
+
+const isNonEmptyString = (value: unknown): value is string =>
+  typeof value === "string" && value.trim() !== "";
+
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
