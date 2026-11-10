@@ -7,6 +7,7 @@ import {
   parseId,
   tableName,
   toRole,
+  isMovieItem,
 } from "../shared/db";
 import { response } from "../shared/http";
 import { logRequest } from "../shared/request-logger";
@@ -24,8 +25,8 @@ export const handler = async (
 
   const actorParam = event.queryStringParameters?.actor;
   const actorId = parseId(actorParam);
-  if (actorParam !== undefined && actorId === undefined) {
-    return response(400, { message: "actor must be a positive integer" });
+  if (actorParam !== undefined && actorId === undefined) { //2 checks since MovieID is required but actor is optional
+    return response(400, { message: "actorID must be a positive integer" });
   }
 
   
@@ -40,6 +41,11 @@ export const handler = async (
     );
 
     const resultItems = queryResult.Items ?? [];
+
+    if (!resultItems.some(isMovieItem)) {
+      return response(404, { message: `Movie ${movieId} not found` }); //added a ismovie err checker, to see if prided movieID is valid
+    }
+
     return response(200, { data: resultItems.filter(isRoleItem).map(toRole) });
   } catch (err) {
     console.error("DynamoDB error:", err);

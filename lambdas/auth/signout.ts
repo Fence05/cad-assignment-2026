@@ -10,3 +10,5 @@ export const handler = async (): Promise<APIGatewayProxyResult> =>
     { message: 'Signed out' },
     { 'set-cookie': 'token=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=None' },
   );
+
+
