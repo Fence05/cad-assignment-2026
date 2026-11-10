@@ -46,7 +46,9 @@ export const handler = async (
       return response(404, { message: `Movie ${movieId} not found` }); //added a ismovie err checker, to see if prided movieID is valid
     }
 
-    return response(200, { data: resultItems.filter(isRoleItem).map(toRole) });
+    const roles = resultItems.filter(isRoleItem).map(toRole);
+    const data = actorId === undefined ? roles : roles.filter((role) => role.actorId === actorId);
+    return response(200, { data });
   } catch (err) {
     console.error("DynamoDB error:", err);
     return response(500, {
