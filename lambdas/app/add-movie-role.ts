@@ -1,5 +1,4 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { TransactWriteCommand } from "@aws-sdk/lib-dynamodb";
 import { actorKey, ddb, movieKey, type Role, tableName } from "../shared/db";
 import { isResponse, parseJsonObject, response } from "../shared/http";
 import { GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
@@ -98,3 +97,5 @@ const roleDescription = body.roleDescription;
     });
   }
 };
+
+//AUTH UTILS FOR ERROR CODES
