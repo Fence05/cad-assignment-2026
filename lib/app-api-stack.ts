@@ -102,5 +102,9 @@ export class AppApiStack extends cdk.Stack {
       .addResource('actors')
       .addResource('{actorID}')
       .addMethod('GET', new apig.LambdaIntegration(getActorFn), userAuth); //added user auth
+
+    moviesResource
+    .addResource('roles')
+    .addMethod('POST', new apig.LambdaIntegration(addMovieRoleFn));
   }
 }
