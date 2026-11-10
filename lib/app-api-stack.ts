@@ -112,11 +112,13 @@ export class AppApiStack extends cdk.Stack {
 const adminKey = api.addApiKey('AdminApiKey');
 const usagePlan = api.addUsagePlan('AdminUsagePlan', { name: 'AdminUsagePlan' });
 
+
 usagePlan.addApiKey(adminKey);
+//make the key deploy upon cdk deploy
 usagePlan.addApiStage({ stage: api.deploymentStage });
 
-new cdk.CfnOutput(this, 'AdminApiKeyId', { value: adminKey.keyId });
-
+// have to use keyID as adminKey isnt string
+new cdk.CfnOutput(this, 'AdminApiKeyId', { value: adminKey.keyId }); 
 
   }
 }
